@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-green
+  labels:
+    app: git-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-green
+  template:
+    metadata:
+      labels:
+        app: git-green
+    spec:
+      initContainers:
+      - name: git-clone
+        image: alpine/git:latest
+        command:
+        - sh
+        - -c
+        - |
+          if [ -n "$GIT_REPO_URL" ]; then
+            echo "Cloning repository from $GIT_REPO_URL..."
+            git clone "$GIT_REPO_URL" /workspace/repo
+            cd /workspace/repo
+            
+            # Configure git if credentials are provided
+            if [ -n "$GIT_USERNAME" ] && [ -n "$GIT_PASSWORD" ]; then
+              git config --global credential.helper store
+              echo "https://$GIT_USERNAME:$GIT_PASSWORD@$GIT_REPO_URL" > ~/.git-credentials
+            fi
+            
+            # Checkout specific branch if specified
+            if [ -n "$GIT_BRANCH" ]; then
+              git checkout "$GIT_BRANCH"
+            fi
+            
+            echo "Repository cloned successfully"
+          else
+            echo "No GIT_REPO_URL provided, skipping clone"
+            mkdir -p /workspace/repo
+          fi
+        env:
+        - name: GIT_REPO_URL
+          valueFrom:
+            configMapKeyRef:
+              name: git-green-config
+              key: git-repo-url
+              optional: true
+        - name: GIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: git-green-secrets
+              key: git-username
+              optional: true
+        - name: GIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: git-green-secrets
+              key: git-password
+              optional: true
+        - name: GIT_BRANCH
+          valueFrom:
+            configMapKeyRef:
+              name: git-green-config
+              key: git-branch
+              optional: true
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+      containers:
+      - name: git-green
+        image: git-green:amd64
+        env:
+        - name: GIT_GREEN_PUSH
+          value: "1"
+        - name: GIT_WORK_DIR
+          value: "/workspace/repo"
+        - name: GIT_USER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: git-green-config
+              key: git-user-name
+              optional: true
+        - name: GIT_USER_EMAIL
+          valueFrom:
+            configMapKeyRef:
+              name: git-green-config
+              key: git-user-email
+              optional: true
+        volumeMounts:
+        - name: workspace
+          mountPath: /workspace
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+      volumes:
+      - name: workspace
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-green-config
+data:
+  # Git repository configuration
+  git-repo-url: "https://github.com/hkmdxlftjf/git-green.git"  # e.g., "https://github.com/username/repository.git"
+  git-branch: "pow"  # Branch to checkout (optional)
+  git-user-name: "Git Green Bot"
+  git-user-email: "git-green-bot@example.com"
+  ALL_PROXY: ""
+  HTTPS_PROXY: ""
+  HTTP_PROXY: ""
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: git-green-secrets
+type: Opaque
+data:
+  # Base64 encoded credentials (optional)
+  git-username: ""  # echo -n "username" | base64
+  git-password: ""  # echo -n "password" | base64
