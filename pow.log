@@ -1,3 +1,1 @@
-{"timestamp":"2025-11-12T10:58:50.894294+08:00","challenge":"2025111210","prev_hash":"","nonce":4,"hash_hex":"002c8c9873cc6d8133d9b81702ec72cc968a73bc2aa5f4827bb2538a0234bc81","difficulty":2}
-{"timestamp":"2025-11-12T10:59:22.476939+08:00","challenge":"2025111210","prev_hash":"002c8c9873cc6d8133d9b81702ec72cc968a73bc2aa5f4827bb2538a0234bc81","nonce":928,"hash_hex":"00600f6890ba82470adc3b71f62a07ac67c42b039e1c6eb8af328fa77eb197a5","difficulty":2}
-{"timestamp":"2025-11-12T11:02:02.062920+08:00","challenge":"2025111211","prev_hash":"00600f6890ba82470adc3b71f62a07ac67c42b039e1c6eb8af328fa77eb197a5","nonce":489489,"hash_hex":"000009ef7c7670c14c23494f6c0b3ca0304711e597f2abfbfb76b88b5265e28b","difficulty":5}
+{"timestamp":"2025-11-12T11:06:09.923557+08:00","challenge":"2025111211","prev_hash":"","nonce":195,"hash_hex":"00d9371858dfd509da9e893c27ba43bbc45006830288536fe279b3f2931bd7b1","difficulty":2}
